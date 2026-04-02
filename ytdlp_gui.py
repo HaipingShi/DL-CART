@@ -738,7 +738,7 @@ Without FFmpeg, many downloads will fail!
             import subprocess
             import sys
             if sys.platform == 'win32':
-                subprocess.Popen(['explorer', '/select,', path])
+                os.startfile(path)
             elif sys.platform == 'darwin':
                 subprocess.Popen(['open', path])
             else:
