@@ -257,18 +257,20 @@ class DownloadManager:
             logger.info(f"Download completed: {download_id} - {download['title']}")
 
         except Exception as e:
-            download['status'] = 'failed'
-            download['error'] = str(e)
             error_msg = str(e)
-            logger.error(f"Download failed: {download_id} - {e}")
-
-            # Call error callback if provided (to show in GUI)
-            if self.error_callback:
-                self.error_callback(f'Download failed: {error_msg[:100]}...', error_msg)
+            if 'cancelled by user' in error_msg.lower():
+                download['status'] = 'cancelled'
+                logger.info(f"Download cancelled: {download_id}")
+            else:
+                download['status'] = 'failed'
+                download['error'] = error_msg
+                logger.error(f"Download failed: {download_id} - {e}")
+                if self.error_callback:
+                    self.error_callback(f'Download failed: {error_msg[:100]}...', error_msg)
 
         finally:
-            self._cancel_flags.pop(download_id, None)
             with self.lock:
+                self._cancel_flags.pop(download_id, None)
                 self.active_downloads.discard(download_id)
             self.process_queue()
 
@@ -329,8 +331,10 @@ class DownloadManager:
         if download_id not in self.downloads:
             return
         # Signal the progress hook to abort
-        if download_id in self._cancel_flags:
-            self._cancel_flags[download_id].set()
+        with self.lock:
+            flag = self._cancel_flags.get(download_id)
+        if flag:
+            flag.set()
         # Remove from queue if not yet started
         with self.lock:
             if download_id in self.queue:
@@ -348,8 +352,11 @@ class DownloadManager:
         """Re-queue a failed or cancelled download."""
         if download_id not in self.downloads:
             return
-        d = self.downloads[download_id]
-        self.downloads.pop(download_id, None)
+        # Cancel any active download first to avoid parallel downloads
+        self.cancel_download(download_id)
+        d = self.downloads[download_id].copy()
+        with self.lock:
+            self.downloads.pop(download_id, None)
         self.add_to_queue(d['url'], d['quality'], d.get('format_id'), d.get('subtitles', 'none'))
 
 
