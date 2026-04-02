@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write   # needed to create/update releases
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: windows-latest
@@ -34,14 +37,14 @@ jobs:
 
       - name: Build EXE
         run: |
-          python -m PyInstaller --onefile --windowed --collect-all yt_dlp --add-binary "ffmpeg.exe;." --add-binary "ffprobe.exe;." --name YT-DLP-GUI ytdlp_gui.py
+          python -m PyInstaller --onefile --windowed --collect-all yt_dlp --add-binary "ffmpeg.exe;." --add-binary "ffprobe.exe;." --name DLCart ytdlp_gui.py
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "YT-DLP GUI - Latest Build"
-          body: "Windows 免安装版，双击 YT-DLP-GUI.exe 即可使用，无需安装 Python 或 FFmpeg。"
+          name: "独轮车 DL Cart - Latest Build"
+          body: "Windows 免安装版，双击 DLCart.exe 即可使用，无需安装 Python 或 FFmpeg。"
           prerelease: false
           make_latest: true
-          files: dist/YT-DLP-GUI.exe
+          files: dist/DLCart.exe

@@ -1,5 +1,5 @@
 """
-YT-DLP GUI - Simple Windows Video Downloader
+独轮车 DL Cart - Full-Featured Video Downloader
 A user-friendly GUI for yt-dlp written in Tkinter
 """
 
@@ -45,7 +45,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('ytdlp_gui.log'),
+        logging.FileHandler('dlcart.log'),
         logging.StreamHandler()
     ]
 )
@@ -126,7 +126,7 @@ class DownloadManager:
 
     def load_settings(self) -> Dict[str, Any]:
         """Load settings from JSON file"""
-        settings_path = Path.home() / '.ytdlp_gui' / 'settings.json'
+        settings_path = Path.home() / '.dlcart' / 'settings.json'
         if settings_path.exists():
             try:
                 with open(settings_path) as f:
@@ -137,7 +137,7 @@ class DownloadManager:
 
     def save_settings(self):
         """Save settings to JSON file"""
-        settings_path = Path.home() / '.ytdlp_gui' / 'settings.json'
+        settings_path = Path.home() / '.dlcart' / 'settings.json'
         settings_path.parent.mkdir(exist_ok=True)
         try:
             with open(settings_path, 'w') as f:
@@ -147,7 +147,7 @@ class DownloadManager:
 
     def load_history(self):
         """Load persisted download history from disk."""
-        history_path = Path.home() / '.ytdlp_gui' / 'history.json'
+        history_path = Path.home() / '.dlcart' / 'history.json'
         if not history_path.exists():
             return
         try:
@@ -161,7 +161,7 @@ class DownloadManager:
 
     def save_history(self):
         """Persist completed/failed/cancelled downloads to disk."""
-        history_path = Path.home() / '.ytdlp_gui' / 'history.json'
+        history_path = Path.home() / '.dlcart' / 'history.json'
         history_path.parent.mkdir(exist_ok=True)
         finished = [
             d for d in self.downloads.values()
@@ -480,7 +480,7 @@ class YTDLPGUI(ttk.Frame):
 
         # Application title
         title_font = Font(family='Segoe UI', size=24, weight='bold')
-        title = ttk.Label(self, text='YT-DLP Downloader', font=title_font, style='TLabel')
+        title = ttk.Label(self, text='独轮车 DL Cart', font=title_font, style='TLabel')
         title.grid(row=0, column=0, columnspan=6, pady=(0, 20))
 
         # URL Section
@@ -826,7 +826,7 @@ Without FFmpeg, many downloads will fail!
                 f"$x.GetElementsByTagName('text')[0].AppendChild($x.CreateTextNode('{title}')) | Out-Null; "
                 f"$x.GetElementsByTagName('text')[1].AppendChild($x.CreateTextNode('{message[:80]}')) | Out-Null; "
                 f"$n = [Windows.UI.Notifications.ToastNotification]::new($x); "
-                f"[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('YT-DLP GUI').Show($n)"
+                f"[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('独轮车 DL Cart').Show($n)"
             )
             subprocess.Popen(
                 ['powershell', '-WindowStyle', 'Hidden', '-Command', script],
@@ -1015,7 +1015,7 @@ View Count: {view_count or 'Unknown'}
         ]
         for did in to_remove:
             self.download_manager.downloads.pop(did, None)
-        history_path = Path.home() / '.ytdlp_gui' / 'history.json'
+        history_path = Path.home() / '.dlcart' / 'history.json'
         if history_path.exists():
             history_path.unlink()
         self.status_var.set(f'Cleared {len(to_remove)} history entries')
@@ -1071,7 +1071,7 @@ Common Solutions:
 4. The video might be blocked/region-restricted
 5. Some sites require login/cookies
 
-Full log available in: ytdlp_gui.log
+Full log available in: dlcart.log
 """
         ttk.Label(dialog, text=solutions, background=self.bg_color,
                  foreground=self.fg_color, justify='left').pack(pady=10, padx=10)
