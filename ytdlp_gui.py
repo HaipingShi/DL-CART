@@ -113,6 +113,7 @@ class DownloadManager:
         self.settings: Dict[str, Any] = self.load_settings()
         self.queue: List[str] = []
         self.lock = threading.Lock()
+        self._cancel_flags: Dict[str, threading.Event] = {}
         self.error_callback = error_callback  # Callback for error reporting
 
     def load_settings(self) -> Dict[str, Any]:
@@ -136,7 +137,7 @@ class DownloadManager:
         except Exception as e:
             logger.error(f"Failed to save settings: {e}")
 
-    def add_to_queue(self, url: str, quality: str = 'best', format_id: str = None,
+    def add_to_queue(self, url: str, quality: str = 'best', format_id: Optional[str] = None,
                        subtitles: str = 'none', subtitle_langs: List[str] = None) -> str:
         """Add download to queue"""
         download_id = str(hash(url + str(datetime.now().timestamp())))
@@ -185,6 +186,8 @@ class DownloadManager:
     def download_video(self, download_id: str):
         """Download a video using yt-dlp"""
         download = self.downloads[download_id]
+        cancel_flag = threading.Event()
+        self._cancel_flags[download_id] = cancel_flag
 
         try:
             download['status'] = 'downloading'
@@ -195,6 +198,8 @@ class DownloadManager:
 
             # Create progress hook
             def progress_hook(d):
+                if cancel_flag.is_set():
+                    raise Exception("Download cancelled by user")
                 if d['status'] == 'downloading':
                     download['progress'] = d.get('_percent_str', '0%').strip('%')
                     download['speed'] = d.get('_speed_str')
@@ -262,10 +267,9 @@ class DownloadManager:
                 self.error_callback(f'Download failed: {error_msg[:100]}...', error_msg)
 
         finally:
+            self._cancel_flags.pop(download_id, None)
             with self.lock:
                 self.active_downloads.discard(download_id)
-
-            # Process next in queue
             self.process_queue()
 
     def _get_download_options(self, download: dict) -> dict:
@@ -321,16 +325,32 @@ class DownloadManager:
         return options
 
     def cancel_download(self, download_id: str):
-        """Cancel a download"""
-        if download_id in self.downloads:
-            if download_id in self.active_downloads:
-                # Note: yt-dlp doesn't support cancellation directly
-                # The download will stop at the next progress check
-                pass
-            else:
+        """Cancel a queued or active download."""
+        if download_id not in self.downloads:
+            return
+        # Signal the progress hook to abort
+        if download_id in self._cancel_flags:
+            self._cancel_flags[download_id].set()
+        # Remove from queue if not yet started
+        with self.lock:
+            if download_id in self.queue:
                 self.queue.remove(download_id)
-            self.downloads[download_id]['status'] = 'cancelled'
-            logger.info(f"Download cancelled: {download_id}")
+        self.downloads[download_id]['status'] = 'cancelled'
+        logger.info(f"Download cancelled: {download_id}")
+
+    def remove_download(self, download_id: str):
+        """Remove a finished/cancelled/failed download from the list."""
+        self.cancel_download(download_id)
+        with self.lock:
+            self.downloads.pop(download_id, None)
+
+    def retry_download(self, download_id: str):
+        """Re-queue a failed or cancelled download."""
+        if download_id not in self.downloads:
+            return
+        d = self.downloads[download_id]
+        self.downloads.pop(download_id, None)
+        self.add_to_queue(d['url'], d['quality'], d.get('format_id'), d.get('subtitles', 'none'))
 
 
 class YTDLPGUI(ttk.Frame):
