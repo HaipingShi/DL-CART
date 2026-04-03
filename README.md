@@ -34,6 +34,10 @@
 
 > **What is this?** A standalone video downloader called **独轮车 (DL Cart)** that integrates the full power of [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [FFmpeg](https://ffmpeg.org/) into a single double-clickable `.exe`. No Python, no FFmpeg, no command line — just paste a URL and download.
 
+<div align="center">
+  <img src="ui.png" alt="独轮车 DL Cart Screenshot" width="600">
+</div>
+
 ---
 
 ## What It Can Do

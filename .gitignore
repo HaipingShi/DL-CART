@@ -26,31 +26,6 @@ ENV/
 env/
 .pytest_cache/
 
-# WinUI 3 / .NET
-bin/
-obj/
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-[Tt]humbs.db
-[Ll]ibrary/
-[Ii]ntermediate/
-[Pp]ackages/
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-[Bb]uilds/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
-
 # OS
 .DS_Store
 .DS_Store?
@@ -72,3 +47,16 @@ ehthumbs.db
 logs/
 *.log
 config.json
+
+# Build artifacts
+*.spec
+ffmpeg.exe
+ffprobe.exe
+ffmpeg.zip
+ffmpeg_tmp/
+
+# yt-dlp source (not needed in repo)
+yt-dlp/
+
+# PyInstaller
+*.manifest

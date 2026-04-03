@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-echo === YT-DLP GUI Builder ===
+echo === 独轮车 DL Cart Builder ===
 echo.
 
 python --version >nul 2>&1
@@ -44,11 +44,11 @@ echo [3/3] Building exe (bundling ffmpeg inside)...
 python -m PyInstaller --onefile --windowed --collect-all yt_dlp ^
     --add-binary "ffmpeg.exe;." ^
     --add-binary "ffprobe.exe;." ^
-    --name YT-DLP-GUI ytdlp_gui.py
+    --name DLCart ytdlp_gui.py
 if errorlevel 1 ( echo ERROR: build failed. && pause && exit /b 1 )
 
 echo.
-echo Done! dist\YT-DLP-GUI.exe is ready.
+echo Done! dist\DLCart.exe is ready.
 echo FFmpeg is bundled inside - users need nothing extra.
 echo.
 pause

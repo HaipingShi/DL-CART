@@ -36,6 +36,10 @@
 >
 > DL = Downloader = 独轮，独轮车载着你的视频滚滚而来。
 
+<div align="center">
+  <img src="ui.png" alt="独轮车 DL Cart 界面截图" width="600">
+</div>
+
 ---
 
 ## 功能一览
